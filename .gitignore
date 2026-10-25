@@ -1,0 +1,15 @@
+.gradle/
+**/build/
+**/.cxx/
+local.properties
+app/src/main/jniLibs/
+artifacts/*
+!artifacts/disclaimer-entry.png
+**/__pycache__/
+*.py[cod]
+.idea/
+*.iml
+*.jks
+*.keystore
+.env
+.env.*

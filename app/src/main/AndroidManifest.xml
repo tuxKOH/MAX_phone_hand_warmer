@@ -1,0 +1,10 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-feature android:glEsVersion="0x00030001" android:required="true"/>
+    <application android:theme="@style/AppTheme" android:label="MAX 暖手實驗室" android:icon="@drawable/ic_launcher" android:allowBackup="false" android:supportsRtl="true">
+        <uses-native-library android:name="libcdsprpc.so" android:required="false"/>
+        <activity android:name=".MainActivity" android:exported="false"/>
+        <activity android:name=".DisclaimerActivity" android:exported="true">
+            <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
+        </activity>
+    </application>
+</manifest>
