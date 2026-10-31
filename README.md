@@ -2,7 +2,13 @@
 
 **这是实验性高功耗压力测试工具，不适合实际暖手或贴身取暖。使用前请阅读风险说明。**
 
-[下载 v0.2.1 实验版 APK](https://github.com/tuxKOH/MAX_phone_hand_warmer/releases/tag/v0.2.1) · [验证范围](docs/VALIDATION.md) · [第三方许可](docs/THIRD_PARTY.md)
+[下载 v0.2.2 实验版 APK](https://github.com/tuxKOH/MAX_phone_hand_warmer/releases/tag/v0.2.2) · [验证范围](docs/VALIDATION.md) · [第三方许可](docs/THIRD_PARTY.md)
+
+### 安装问题
+
+若 v0.2.1 报 `INSTALL_FAILED_CONTAINER_ERROR` / `Failed to extract native libraries, res=-18`，请尝试 v0.2.2。新版将原生 `.so` 以未压缩方式打包，绕过安装时的 DEFLATE 解压，仍保留系统提取目录供 QNN 加载；APK 因此增大。保留原签名，可直接覆盖安装，无需先卸载。
+
+此错误也可能由下载损坏、存储或厂商安装器引起，不能仅凭错误码确定原因。请从 Release 下载完整 APK，核对同页 SHA-256 校验文件，并留出足够安装空间（建议至少 1 GB）。若仍失败，请提供设备型号、Android 版本、剩余空间和安装错误日志。v0.2.1 在开发用 8 Elite 上可成功安装，未复现报错设备的问题。
 
 ## 风险告知与免责声明
 

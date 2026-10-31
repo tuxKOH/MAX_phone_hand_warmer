@@ -1,5 +1,14 @@
 # 验证范围
 
+## v0.2.2
+
+- 针对使用者反馈的安装提取错误 `INSTALL_FAILED_CONTAINER_ERROR` / `res=-18`，将原生库从 ZIP DEFLATE 压缩改为原样存储，保留 `extractNativeLibs=true` 的提取路径供 QNN 使用。
+- v0.2.1 在当前连接的 8 Elite 上成功覆盖安装，没有复现报错；无法仅凭错误码确认报错设备的根因。
+- 通过 `scripts/verify-apk.py` 检查 ZIP CRC、重复条目、所有原生库未压缩、CPU ABI、QNN 各架构库及第三方声明；DSP Skel 与 SDK 原文件逐字节比较。
+- 应用和测试 APK 构建通过，Lint 为 0 errors、5 warnings；APK 签名与 v0.2.1 一致，支持覆盖安装。
+- v0.2.2 在连接的 8 Elite 上覆盖安装成功，已核对安装目录中全部 17 个 ARM64 库的 SHA-256 与 APK 内容一致；未启动应用。
+- 不运行手机压力测试。报错的 8 Gen 2 设备仍需使用者安装确认。
+
 ## v0.2.1
 
 - 新增 Snapdragon 8 Gen 2 / SM8550（HTP v73），包含同一 QAIRT 版本的 v73 Stub、CalculatorStub 和 DSP Skel。

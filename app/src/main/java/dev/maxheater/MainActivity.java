@@ -117,7 +117,7 @@ public final class MainActivity extends Activity {
         status=text(lastReason,12,LIME); status.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE); add(dock,status,3,0);
         add(root,text("高功耗壓力測試工具，勿貼身取暖或無人值守。\n45°C 電池上限不代表外殼安全溫度。\n系統嚴重熱壓力即停 · 離開畫面自動停止\n最長 5 分鐘 · 電量需大於 15%",11,MUTED),2,10);
         TextView info=text("支援與運作說明  ↗",12,INK); info.setPadding(0,dp(10),0,dp(10)); info.setOnClickListener(v->showInfo()); root.addView(info);
-        root.addView(text("MAX HEATER   /   EXPERIMENTAL BUILD 0.2.1",9,MUTED)); setContentView(shell); refresh();
+        root.addView(text("MAX HEATER   /   EXPERIMENTAL BUILD 0.2.2",9,MUTED)); setContentView(shell); refresh();
     }
     private void engineCard(LinearLayout root,int index,String number,String name,String description,boolean selected,boolean enabled) {
         LinearLayout card=column(); card.setPadding(dp(14),dp(12),dp(14),dp(12)); card.setBackground(box(PANEL,LINE)); LinearLayout header=row();
