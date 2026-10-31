@@ -6,7 +6,8 @@ final class DeviceProfile {
     final boolean candidate;
     DeviceProfile(String model, boolean arm64) {
         String soc=model.toUpperCase(Locale.ROOT);
-        if (soc.contains("SM8650")) { chip="Snapdragon 8 Gen 3"; architecture="HTP v75"; candidate=arm64; note="SDK 列出支援 · 真機待測"; }
+        if (soc.contains("SM8550")) { chip="Snapdragon 8 Gen 2"; architecture="HTP v73"; candidate=arm64; note="SDK 列出支援 · 真機待測"; }
+        else if (soc.contains("SM8650")) { chip="Snapdragon 8 Gen 3"; architecture="HTP v75"; candidate=arm64; note="SDK 列出支援 · 真機待測"; }
         else if (soc.contains("SM8750")) { chip="Snapdragon 8 Elite"; architecture="HTP v79"; candidate=arm64; note="SDK 列出支援 · 真機待測"; }
         else if (soc.contains("SM8845")) { chip="Snapdragon 8 Gen 5"; architecture="HTP 待探測"; candidate=arm64; note="實驗性 · SDK 未明列此 SoC"; }
         else if (soc.contains("SM8850")) { chip="Snapdragon 8 Elite Gen 5"; architecture="HTP v81"; candidate=arm64; note="SDK 列出支援 · 真機待測"; }

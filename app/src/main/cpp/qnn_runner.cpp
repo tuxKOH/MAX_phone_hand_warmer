@@ -25,6 +25,7 @@ struct QnnSession {
     Qnn_ContextHandle_t context=nullptr;
     Qnn_GraphHandle_t graph=nullptr;
     uint32_t n,layers,dims[3];
+    QnnHtpDevice_Arch_t architecture=QNN_HTP_DEVICE_ARCH_NONE;
     uint32_t random=0x6d617821;
     std::string directory;
     std::vector<uint8_t> input,output;
@@ -60,6 +61,18 @@ struct QnnSession {
         if(api.logCreate) api.logCreate(nullptr,QNN_LOG_LEVEL_WARN,&logger);
         check(api.backendCreate(logger,nullptr,&backend),"backendCreate HTP");
         check(api.deviceCreate(logger,nullptr,&device),"deviceCreate HTP（檢查 CDSP 驅動 / Stub / Skel）");
+        const QnnDevice_PlatformInfo_t* platform=nullptr;
+        if(api.deviceGetPlatformInfo && api.deviceFreePlatformInfo && api.deviceGetPlatformInfo(logger,&platform)==QNN_SUCCESS && platform) {
+            if(platform->version==QNN_DEVICE_PLATFORM_INFO_VERSION_1 && platform->v1.hwDevices) {
+                for(uint32_t i=0;i<platform->v1.numHwDevices;i++) {
+                    const auto& hw=platform->v1.hwDevices[i];
+                    if(hw.version!=QNN_DEVICE_HARDWARE_DEVICE_INFO_VERSION_1 || hw.v1.deviceId!=QNN_DEVICE_DEFAULT_DEVICE_ID) continue;
+                    auto extension=hw.v1.deviceInfoExtension;
+                    if(extension && extension->devType==QNN_HTP_DEVICE_TYPE_ON_CHIP) architecture=extension->onChipDevice.arch;
+                }
+            }
+            api.deviceFreePlatformInfo(logger,platform);
+        }
         check(api.contextCreate(backend,device,nullptr,&context),"contextCreate");
         QnnHtpGraph_CustomConfig_t optimization{};
         optimization.option=QNN_HTP_GRAPH_CONFIG_OPTION_OPTIMIZATION;
@@ -122,8 +135,9 @@ struct PowerVote {
     QnnHtpDevice_PerfInfrastructure_t* perf=nullptr;
     uint32_t powerId=0; bool powerCreated=false;
     ~PowerVote() { if(powerCreated) perf->destroyPowerConfigId(powerId); }
-    std::string request(QNN_INTERFACE_VER_TYPE& api) {
+    std::string request(QNN_INTERFACE_VER_TYPE& api,QnnHtpDevice_Arch_t architecture) {
         bool voted=false,hmxVoted=false,cengVoted=false;
+        const bool separateVotes=architecture==QNN_HTP_DEVICE_ARCH_NONE || architecture>=QNN_HTP_DEVICE_ARCH_V75;
         QnnDevice_Infrastructure_t infrastructure=nullptr;
         if(api.deviceGetInfrastructure && api.deviceGetInfrastructure(&infrastructure)==QNN_SUCCESS && infrastructure && infrastructure->infraType==QNN_HTP_DEVICE_INFRASTRUCTURE_TYPE_PERF) {
             perf=&infrastructure->perfInfra;
@@ -142,10 +156,10 @@ struct PowerVote {
                 v.coreVoltageCornerMax=DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
                 const QnnHtpPerfInfrastructure_PowerConfig_t* configs[]={&config,nullptr};
                 voted=perf->setPowerConfig(powerId,configs)==QNN_SUCCESS;
-                if(voted) {
-                    // QAIRT HTP backend guide: HMX and CENG require an active DCVS
-                    // vote on the same ID. Submit separately so rejection does not
-                    // discard the accepted core/bus vote on older device drivers.
+                if(voted && separateVotes) {
+                    // HMX/CENG votes require v75+ and an active DCVS vote on the
+                    // same ID. A missing architecture report keeps the existing
+                    // best-effort requests; rejection preserves the core/bus vote.
                     QnnHtpPerfInfrastructure_PowerConfig_t hmx{};
                     hmx.option=QNN_HTP_PERF_INFRASTRUCTURE_POWER_CONFIGOPTION_HMX_V2;
                     hmx.hmxV2Config.hmxPickDefault=0;
@@ -167,7 +181,7 @@ struct PowerVote {
             }
         }
 
-        return std::string("DSP/Bus:")+(voted?"接受":"未接受")+" HMX:"+(hmxVoted?"接受":"未接受")+" CENG:"+(cengVoted?"接受":"未接受");
+        return std::string("DSP/Bus:")+(voted?"接受":"未接受")+" HMX:"+(!separateVotes?"不適用":hmxVoted?"接受":"未接受")+" CENG:"+(!separateVotes?"不適用":cengVoted?"接受":"未接受");
     }
 };
 void runQnn(const std::string& dir) {
@@ -178,7 +192,7 @@ void runQnn(const std::string& dir) {
         auto& session=ensurePrepared(dir);
         if(!active()) { states[2]=4; return; }
         PowerVote vote;
-        auto accepted=vote.request(session.api);
+        auto accepted=vote.request(session.api,session.architecture);
         detail(2,"QNN HTP · "+std::to_string(session.n)+"³ × "+std::to_string(session.layers)+" · 圖復用 / 編譯 "+std::to_string(compilations.load())+" 次 · "+accepted);
         while(active()) {
             auto error=session.api.graphExecute(session.graph,&session.in,1,&session.out,1,nullptr,nullptr);

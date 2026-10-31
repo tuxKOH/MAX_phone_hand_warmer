@@ -117,7 +117,7 @@ public final class MainActivity extends Activity {
         status=text(lastReason,12,LIME); status.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE); add(dock,status,3,0);
         add(root,text("高功耗壓力測試工具，勿貼身取暖或無人值守。\n45°C 電池上限不代表外殼安全溫度。\n系統嚴重熱壓力即停 · 離開畫面自動停止\n最長 5 分鐘 · 電量需大於 15%",11,MUTED),2,10);
         TextView info=text("支援與運作說明  ↗",12,INK); info.setPadding(0,dp(10),0,dp(10)); info.setOnClickListener(v->showInfo()); root.addView(info);
-        root.addView(text("MAX HEATER   /   EXPERIMENTAL BUILD 0.2",9,MUTED)); setContentView(shell); refresh();
+        root.addView(text("MAX HEATER   /   EXPERIMENTAL BUILD 0.2.1",9,MUTED)); setContentView(shell); refresh();
     }
     private void engineCard(LinearLayout root,int index,String number,String name,String description,boolean selected,boolean enabled) {
         LinearLayout card=column(); card.setPadding(dp(14),dp(12),dp(14),dp(12)); card.setBackground(box(PANEL,LINE)); LinearLayout header=row();
@@ -125,7 +125,7 @@ public final class MainActivity extends Activity {
         Switch toggle=new Switch(this); toggle.setContentDescription(name+" 負載開關"); toggle.setChecked(selected); toggle.setEnabled(enabled); toggles[index]=toggle; header.addView(toggle); card.addView(header);
         card.addView(text(description,11,MUTED)); LinearLayout metrics=row(); rates[index]=text("—",17,LIME); badges[index]=text(enabled?"待命":"不可用",11,MUTED);
         metrics.addView(rates[index],new LinearLayout.LayoutParams(0,dp(32),1)); badges[index].setGravity(Gravity.CENTER_VERTICAL|Gravity.END); metrics.addView(badges[index]); card.addView(metrics);
-        details[index]=text(index==2&&!enabled?"此裝置不在四款目標 SoC 內":"等待啟動",10,MUTED); details[index].setTextIsSelectable(true); card.addView(details[index]); add(root,card,8,0);
+        details[index]=text(index==2&&!enabled?"此裝置不在目標 SoC 內":"等待啟動",10,MUTED); details[index].setTextIsSelectable(true); card.addView(details[index]); add(root,card,8,0);
     }
     private void startSession() {
         if(!foreground || busy) return;
@@ -196,7 +196,7 @@ public final class MainActivity extends Activity {
         return String.format(Locale.ROOT,"%.3f %s%s",ops/(engine==0?1e9:1e12),engine==0?"GFLOPS":engine==1?"TFLOPS FP32":"TOPS INT8",average?" 平均":"");
     }
     private void showInfo() {
-        new AlertDialog.Builder(this).setTitle("運作與相容性").setMessage("目標平台\n• 8 Gen 3 / SM8650：HTP v75\n• 8 Elite / SM8750：HTP v79\n• 8 Gen 5 / SM8845：實驗性，SDK 晶片表未明列，需真機探測\n• 8 Elite Gen 5 / SM8850：HTP v81\n\n三路皆為實際計算。NPU 使用 QNN HTP 建立 16 層 2048×2048 INT8 MatMul；沒有 CPU 推論回退。\n\n一般 App 無法鎖定最高功耗，也無法可靠取得各引擎瓦數；圖執行成功僅證明 HTP 運算成功，不代表 NPU 滿功耗。目前預設每個 HTP graph 為 274,877,906,944 ops，每次 GPU dispatch 的主迴圈為 17,179,869,184 FLOPs；數值由原生引擎目前設定取得。即時值按約 0.5 秒取樣；平均值包含初始化與釋放時間。數值代表此測試核心的邏輯運算吞吐，會受編譯器最佳化影響，並非硬體計數器或晶片理論峰值。最高功耗與其他機型相容性仍需真機驗證。\n\n電池溫度不同於表面溫度。45°C 上限不是持握安全保證。達上限、溫控嚴重、低電量、感測值缺失、到時或離開畫面都會停止提交負載；進行中的驅動呼叫返回後釋放資源。").setPositiveButton("知道了",null).show();
+        new AlertDialog.Builder(this).setTitle("運作與相容性").setMessage("目標平台\n• 8 Gen 2 / SM8550：HTP v73（真機待測）\n• 8 Gen 3 / SM8650：HTP v75\n• 8 Elite / SM8750：HTP v79\n• 8 Gen 5 / SM8845：實驗性，SDK 晶片表未明列，需真機探測\n• 8 Elite Gen 5 / SM8850：HTP v81\n\n三路皆為實際計算。NPU 使用 QNN HTP 建立 16 層 2048×2048 INT8 MatMul；沒有 CPU 推論回退。\n\n一般 App 無法鎖定最高功耗，也無法可靠取得各引擎瓦數；圖執行成功僅證明 HTP 運算成功，不代表 NPU 滿功耗。目前預設每個 HTP graph 為 274,877,906,944 ops，每次 GPU dispatch 的主迴圈為 17,179,869,184 FLOPs；數值由原生引擎目前設定取得。即時值按約 0.5 秒取樣；平均值包含初始化與釋放時間。數值代表此測試核心的邏輯運算吞吐，會受編譯器最佳化影響，並非硬體計數器或晶片理論峰值。最高功耗與其他機型相容性仍需真機驗證。\n\n電池溫度不同於表面溫度。45°C 上限不是持握安全保證。達上限、溫控嚴重、低電量、感測值缺失、到時或離開畫面都會停止提交負載；進行中的驅動呼叫返回後釋放資源。").setPositiveButton("知道了",null).show();
     }
     @Override protected void onResume() { super.onResume(); foreground=true; }
     @Override protected void onPause() { foreground=false; stopSession("已離開畫面，自動停止"); super.onPause(); }

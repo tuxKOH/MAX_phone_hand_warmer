@@ -2,7 +2,7 @@
 
 **这是实验性高功耗压力测试工具，不适合实际暖手或贴身取暖。使用前请阅读风险说明。**
 
-[下载 v0.2.0 实验版 APK](https://github.com/tuxKOH/MAX_phone_hand_warmer/releases/tag/v0.2.0) · [验证范围](docs/VALIDATION.md) · [第三方许可](docs/THIRD_PARTY.md)
+[下载 v0.2.1 实验版 APK](https://github.com/tuxKOH/MAX_phone_hand_warmer/releases/tag/v0.2.1) · [验证范围](docs/VALIDATION.md) · [第三方许可](docs/THIRD_PARTY.md)
 
 ## 风险告知与免责声明
 
@@ -23,7 +23,7 @@
 
 - CPU：每个硬件线程执行多条独立 FP32 NEON FMA 链；工作线程适当降低优先级，为界面和加速器提交留出调度时间。
 - GPU：OpenGL ES 3.1 计算着色器，默认 16 条独立 vec4 计算链、512 次循环、262144 个 invocation；四组输出缓冲区与 fence 排队，避免每次 dispatch 后 glFinish。
-- NPU：仅使用 QNN HTP，不回退到 CPU。默认 16 层 2048 × 2048 UINT8 仿射量化 MatMul；显示为 INT8 TOPS。运行期间通过官方性能接口请求 DSP/总线、HMX 和 CENG 的性能配置，分别报告是否接受，仍受系统和厂商策略约束。
+- NPU：仅使用 QNN HTP，不回退到 CPU。默认 16 层 2048 × 2048 UINT8 仿射量化 MatMul；显示为 INT8 TOPS。运行期间通过官方性能接口请求 DSP/总线、HMX 和 CENG 的性能配置，分别报告是否接受，仍受系统和厂商策略约束。HTP v73（8 Gen 2）使用 DSP/总线性能请求；独立 HMX/CENG 性能请求要求 v75 及以后，v73 不适用。
 
 确认入口声明并进入主界面后，后台准备 HTP context、图和缓冲区。**同一进程、同一 NPU 图配置只编译一次**，之后启动/停止复用已编译图；停止后撤销性能请求，不持续执行推理。进程被杀或安装更新后需要重新编译，未实现磁盘二进制缓存。改变矩阵大小或层数会替换缓存；执行错误使图失效后，下次尝试重建。界面显示成功编译次数。
 
@@ -41,6 +41,7 @@ NPU ops / graph      = 2 × matrix³ × layers
 
 | 平台 | SoC | HTP | 验证状态 |
 | --- | --- | --- | --- |
+| Snapdragon 8 Gen 2 | SM8550 | v73 | SDK 明列支持，已配置；未做本项目真机验证 |
 | Snapdragon 8 Gen 3 | SM8650 | v75 | 已配置，未做本项目真机验证 |
 | Snapdragon 8 Elite | SM8750 | v79 | 旧版已验证真实 HTP 执行；最新缓存改动仅构建检查 |
 | Snapdragon 8 Gen 5 | SM8845 | 待探测 | 实验性；当前 SDK 芯片表未明列，不能承诺支持 |
